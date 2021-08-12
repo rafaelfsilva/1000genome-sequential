@@ -12,3 +12,12 @@ $ export PATH=$PATH:$PWD/bin
 $ ./prepare_input.sh
 $ ./1000genome-workflow-spec.py
 ```
+
+### Instructions to run a single program of the workflow:
+
+The following instructions assume at least a successful run of the workflows has been completed:
+
+```
+$ cd data/20130502
+$ 
+```

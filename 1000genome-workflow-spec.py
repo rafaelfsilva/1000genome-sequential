@@ -6,7 +6,7 @@ import subprocess
 import sys
 import time
 
-verbose = False
+verbose = True
 
 
 class Task:
