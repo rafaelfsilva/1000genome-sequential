@@ -67,7 +67,7 @@ class Task:
         cmd = self.executable + " " + ' '.join(self.arguments)
 
         if verbose:
-            redirect = None
+            # redirect = None
             sys.stderr.write('\tRunning sub command: ' + cmd + "\n")
         else:
             redirect = subprocess.DEVNULL
