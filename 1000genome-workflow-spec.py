@@ -66,11 +66,10 @@ class Task:
 
         cmd = self.executable + " " + ' '.join(self.arguments)
 
+        redirect = subprocess.DEVNULL
         if verbose:
             # redirect = None
             sys.stderr.write('\tRunning sub command: ' + cmd + "\n")
-        else:
-            redirect = subprocess.DEVNULL
 
         start = time.time()
         os.chdir("./data/20130502/")
