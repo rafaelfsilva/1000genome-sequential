@@ -164,9 +164,7 @@ if __name__ == "__main__":
     wf = Workflow("1000Genome")
 
     # Population Files
-    populations = []
-    for pop_file in os.listdir('data/populations'):
-        populations.append("./populations/{}".format(pop_file))
+    populations = ["ALL", "AFR", "AMR", "EAS", "EUR", "GBR", "SAS"]
 
     f = open("data.csv")
     datacsv = csv.reader(f)
