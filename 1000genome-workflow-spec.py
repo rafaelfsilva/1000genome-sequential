@@ -172,6 +172,8 @@ if __name__ == "__main__":
     datacsv = csv.reader(f)
     step = 1000
     c_nums = []
+    sifted_files = []
+    sifted_tasks = []
 
     for row in datacsv:
         base_file = row[0]
@@ -198,7 +200,7 @@ if __name__ == "__main__":
             counter = counter + step
 
         # merge job
-        j_individuals_merge = Task("individuals_merge")
+        j_individuals_merge = Task("individuals_merge.py")
         j_individuals_merge.add_args(c_num)
 
         for f_chrn in output_files:
@@ -211,6 +213,19 @@ if __name__ == "__main__":
 
         wf.add_tasks(j_individuals_merge)
         # individuals_merge_jobs.append(j_individuals_merge)
+
+        # Sifting Job
+        f_sifting = row[2]
+        f_sifted = "sifted.SIFT.chr{}.txt".format(c_num)
+        sifted_files.append(f_sifted)
+
+        j_sifting = Task("sifting.py")
+        j_sifting.add_inputs(f_sifting)
+        j_sifting.add_outputs(f_sifted)
+        j_sifting.add_args(f_sifting, c_num)
+
+        wf.add_tasks(j_sifting)
+        sifted_tasks.append(j_sifting)
 
     # Run the workflow sequentially
     wf.run()
