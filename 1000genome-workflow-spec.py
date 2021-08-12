@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
-import argparse
 import csv
 import os
-import re
 import subprocess
 import sys
 import time
@@ -29,7 +27,7 @@ class Task:
         for arg in args:
             self.inputfiles.append(arg)
 
-    def add_outputs(self, *args, stage_out):
+    def add_outputs(self, *args):
         """
         Method to add output files to the task
         """
@@ -43,7 +41,7 @@ class Task:
         for arg in args:
             self.arguments.append(arg)
 
-    def print(self):
+    def __str__(self):
         """
         Method to print the task
         """
@@ -75,10 +73,12 @@ class Task:
             redirect = subprocess.DEVNULL
 
         start = time.time()
+        os.chdir("./data/20130502/")
         if subprocess.call(cmd, shell=True, stderr=redirect, stdout=redirect) != 0:
             sys.stderr.write('\tCommand ' + cmd + ' failed!')
             sys.exit(1)
         end = time.time()
+        os.chdir("../../")
         sys.stderr.write("  [executed in " + str("{:.2f}".format(end - start)) + " seconds]\n")
 
 
@@ -99,13 +99,13 @@ class Workflow:
         for task in tasks:
             self.tasks.append(task)
 
-    def print(self, path):
+    def __str__(self):
         """
         Method to print the workflow, if needed
         """
         print("Workflow " + self.name + " with " + str(len(self.tasks)) + " tasks")
         for task in self.tasks:
-            task.print()
+            print(task)
 
     def run(self):
         """
@@ -163,6 +163,11 @@ class Workflow:
 if __name__ == "__main__":
     wf = Workflow("1000Genome")
 
+    # Population Files
+    populations = []
+    for pop_file in os.listdir('data/populations'):
+        populations.append(pop_file)
+
     f = open("data.csv")
     datacsv = csv.reader(f)
     step = 1000
@@ -172,6 +177,7 @@ if __name__ == "__main__":
         base_file = row[0]
         threshold = int(row[1])
         counter = 1
+        output_files = []
 
         # Individuals tasks
         c_num = base_file[base_file.find("chr") + 3:]
@@ -181,12 +187,12 @@ if __name__ == "__main__":
         while counter < threshold:
             stop = counter + step
             out_name = "chr{}n-{}-{}.tar.gz".format(c_num, counter, stop)
+            output_files.append(out_name)
 
             j_individuals = Task("individuals.py")
-            j_individuals.add_inputs("./data/20130502/{}".format(base_file), "./data/20130502/columns.txt")
-            j_individuals.add_outputs(out_name, stage_out=False)
-            j_individuals.add_args("./data/20130502/{}".format(base_file), c_num, str(counter), str(stop),
-                                   str(threshold))
+            j_individuals.add_inputs(base_file, "columns.txt")
+            j_individuals.add_outputs(out_name)
+            j_individuals.add_args(base_file, c_num, str(counter), str(stop), str(threshold))
             wf.add_tasks(j_individuals)
 
             counter = counter + step
@@ -194,6 +200,17 @@ if __name__ == "__main__":
         # merge job
         j_individuals_merge = Task("individuals_merge")
         j_individuals_merge.add_args(c_num)
+
+        for f_chrn in output_files:
+            j_individuals_merge.add_inputs(f_chrn)
+            j_individuals_merge.add_args(f_chrn)
+
+        f_chrn_merged = "chr{}n.tar.gz".format(c_num)
+        # individuals_files.append(f_chrn_merged)
+        j_individuals_merge.add_outputs(f_chrn_merged)
+
+        wf.add_tasks(j_individuals_merge)
+        # individuals_merge_jobs.append(j_individuals_merge)
 
     # Run the workflow sequentially
     wf.run()
