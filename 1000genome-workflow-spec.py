@@ -166,12 +166,13 @@ if __name__ == "__main__":
     # Population Files
     populations = []
     for pop_file in os.listdir('data/populations'):
-        populations.append(pop_file)
+        populations.append("./populations/{}".format(pop_file))
 
     f = open("data.csv")
     datacsv = csv.reader(f)
     step = 1000
     c_nums = []
+    individuals_files = []
     sifted_files = []
     sifted_tasks = []
 
@@ -208,14 +209,14 @@ if __name__ == "__main__":
             j_individuals_merge.add_args(f_chrn)
 
         f_chrn_merged = "chr{}n.tar.gz".format(c_num)
-        # individuals_files.append(f_chrn_merged)
+        individuals_files.append(f_chrn_merged)
         j_individuals_merge.add_outputs(f_chrn_merged)
 
         wf.add_tasks(j_individuals_merge)
         # individuals_merge_jobs.append(j_individuals_merge)
 
         # Sifting Job
-        f_sifting = row[2]
+        f_sifting = "./sifting/{}".format(row[2])
         f_sifted = "sifted.SIFT.chr{}.txt".format(c_num)
         sifted_files.append(f_sifted)
 
@@ -226,6 +227,17 @@ if __name__ == "__main__":
 
         wf.add_tasks(j_sifting)
         sifted_tasks.append(j_sifting)
+
+    # Analyses jobs
+    for i in range(len(individuals_files)):
+        for f_pop in populations:
+            # Mutation Overlap Job
+            j_mutation = Task("mutation_overlap.py")
+            j_mutation.add_args('-c', c_nums[i], '-pop', f_pop)
+            j_mutation.add_inputs(individuals_files[i], sifted_files[i], f_pop, "columns.txt")
+            f_mut_out = "chr%s-%s.tar.gz".format(c_nums[i], f_pop)
+            j_mutation.add_outputs(f_mut_out)
+            wf.add_tasks(j_mutation)
 
     # Run the workflow sequentially
     wf.run()
