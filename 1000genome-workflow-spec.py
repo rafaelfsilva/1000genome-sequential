@@ -237,5 +237,15 @@ if __name__ == "__main__":
             j_mutation.add_outputs(f_mut_out)
             wf.add_tasks(j_mutation)
 
+            # Frequency Mutations Overlap Job
+            j_freq = Task("frequency.py")
+            j_freq.add_args('-c', c_nums[i], '-pop', f_pop)
+            j_freq.add_inputs(individuals_files[i], sifted_files[i], f_pop, "columns.txt")
+
+            f_freq_out = "chr{}-{}-freq.tar.gz".format(c_nums[i], f_pop)
+            j_freq.add_outputs(f_freq_out)
+
+            wf.add_tasks(j_freq)
+
     # Run the workflow sequentially
     wf.run()
