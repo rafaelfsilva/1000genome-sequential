@@ -2,6 +2,7 @@
 
 ### Requirements:
 - Python 3.6 or later
+- Mapplotlib: `pip install matplotlib`
 
 ### Instructions on how to run the sequential workflow:
 ```
