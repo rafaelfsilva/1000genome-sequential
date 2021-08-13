@@ -38,7 +38,7 @@ def processing(inputfile, columfile, c, counter, stop, total):
     rawdata = readfile(inputfile)
 
     # step 2
-    ndir = 'chr{}n/'.format(c)
+    ndir = 'chr{}n-{}/'.format(c, counter)
     os.makedirs(ndir, exist_ok=True)
 
     # step 3
